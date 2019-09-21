@@ -69,7 +69,7 @@ def create_train_test_dataset(nr_of_buckets, train_worker_ids, test_worker_ids, 
     
 
 if __name__=='__main__':
-    sessions = load_data('iui20_ideaSubmits.csv', 'iui20_inspirationRequests.csv')
+    sessions = load_data_as_sessions_dict('iui20_ideaSubmits.csv', 'iui20_inspirationRequests.csv')
     print(sessions.keys())
     print(sessions[list(sessions.keys())[0]])
 
