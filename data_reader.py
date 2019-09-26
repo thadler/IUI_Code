@@ -31,15 +31,11 @@ def make_buckets(data, seconds_per_bucket):
     return np.array(bucketed_data)
 
 
-def add_avoiders_and_seekers(sessions, cut='median'):
-    # cut = median of overall requests per worker
-    if cut=='median': 
-        requests = [sessions[worker_id]['requests'] for worker_id in sessions.keys()]
-        cut = np.median([sum(request) for request in requests])
+def add_avoiders_undetermined_and_seekers(sessions):
     #print(median_requests)
     for key in sessions.keys():
         s = sessions[key]
-        s['target'] = 0 if sum(s['requests']) < cut else 1
+        s['target'] = -1 if sum(s['requests']) < 2  else 0 if sum(s['requests']) < 4 else 1
     return sessions
 
 
