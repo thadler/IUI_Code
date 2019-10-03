@@ -35,7 +35,8 @@ def add_avoiders_undetermined_and_seekers(sessions):
     #print(median_requests)
     for key in sessions.keys():
         s = sessions[key]
-        s['target'] = -1 if sum(s['requests']) < 2  else 0 if sum(s['requests']) < 4 else 1
+        #s['target'] = 0 if sum(s['requests']) < 2  else 1 if sum(s['requests']) < 4 else 2
+        s['target'] = 0 if sum(s['requests']) < 2  else 1
     return sessions
 
 
@@ -53,7 +54,10 @@ def create_train_test_dataset(nr_of_buckets, train_worker_ids, test_worker_ids, 
     for worker_id in sessions.keys():
         submits  = sessions[worker_id]['submits' ]
         requests = sessions[worker_id]['requests']
-        instance = np.concatenate((submits[:nr_of_buckets], requests[:nr_of_buckets]))
+        #instance = np.concatenate((submits[:nr_of_buckets], requests[:nr_of_buckets]))
+        #instance = np.concatenate((requests[:nr_of_buckets], [1.0*np.sum(requests[:nr_of_buckets])/nr_of_buckets]))
+        instance = requests[:nr_of_buckets]
+        #instance = submits[:nr_of_buckets]
         if worker_id in train_worker_ids:
             x_train.append(instance)
             y_train.append(sessions[worker_id]['target'])
@@ -61,7 +65,7 @@ def create_train_test_dataset(nr_of_buckets, train_worker_ids, test_worker_ids, 
             x_test.append(instance)
             y_test.append(sessions[worker_id]['target'])
     return np.array(x_train), np.array(y_train), np.array(x_test), np.array(y_test)
-            
+        
     
 
 if __name__=='__main__':
