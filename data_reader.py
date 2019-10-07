@@ -1,7 +1,7 @@
 import csv
 import numpy as np
 from sklearn.model_selection import train_test_split
-
+from sklearn.metrics import accuracy_score
 
 def load_data_as_sessions_dict(path2submits, path2requests, seconds_per_bucket=60):
     sessions = dict()
@@ -18,6 +18,27 @@ def load_data_as_sessions_dict(path2submits, path2requests, seconds_per_bucket=6
         data = [row for row in reader][1:]
         worker_ids = [row[-1] for row in data]
         data = np.array([[int(nr) for nr in row[:-1]] for row in data])
+        data = make_buckets(data, seconds_per_bucket)
+        for i, worker_id in enumerate(worker_ids):
+            sessions[worker_id]['requests'] = data[i]
+    return sessions
+
+def load_data_as_sessions_dict_with_kimlabels(path2submits, path2requests, seconds_per_bucket=60):
+    sessions = dict()
+    with open(path2submits, 'r') as csvfile:
+        reader = csv.reader(csvfile, delimiter=';')
+        data = [row for row in reader][1:] # removes header
+        worker_ids = [row[-1] for row in data]
+        data = np.array([[int(nr) for nr in data[i][:-1]] for i in range(len(data))])
+        data = make_buckets(data, seconds_per_bucket)
+        for i, worker_id in enumerate(worker_ids):
+            sessions[worker_id] = {'submits': data[i]}
+    with open(path2requests, 'r') as csvfile:
+        reader = csv.reader(csvfile, delimiter=',')
+        data = [row for row in reader][1:]
+        worker_ids = [row[-2] for row in data]
+        kim_labels = [row[-1] for row in data]
+        data = np.array([[int(nr) for nr in data[i][:-2]] for i in range(len(data)) if kim_labels[i]])
         data = make_buckets(data, seconds_per_bucket)
         for i, worker_id in enumerate(worker_ids):
             sessions[worker_id]['requests'] = data[i]
@@ -65,8 +86,6 @@ def create_train_test_dataset(nr_of_buckets, train_worker_ids, test_worker_ids, 
             x_test.append(instance)
             y_test.append(sessions[worker_id]['target'])
     return np.array(x_train), np.array(y_train), np.array(x_test), np.array(y_test)
-        
-    
 
 if __name__=='__main__':
     sessions = load_data_as_sessions_dict('iui20_ideaSubmits.csv', 'iui20_inspirationRequests.csv')
